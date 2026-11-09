@@ -44,7 +44,7 @@ docker compose --profile setup run --rm adguard-setup
 
 | service | URL / port |
 |---|---|
-| unbound-web | http://127.0.0.1:8088 |
+| unbound-web | http://127.0.0.1:8088 (เปลี่ยน port ด้วย `WEBAPP_PORT`) |
 | AdGuard Home | http://127.0.0.1:3001 |
 | DNS | `127.0.0.1:53` (แก้ `DNS_BIND` ใน `.env` ให้ LAN ใช้) |
 

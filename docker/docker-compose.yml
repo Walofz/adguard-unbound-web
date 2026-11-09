@@ -83,7 +83,7 @@ services:
 
     # bind แค่ localhost โดย default — เปิดให้ LAN เข้าถึงด้วย WEBAPP_BIND=0.0.0.0
     ports:
-      - "${WEBAPP_BIND:-127.0.0.1}:8088:8080"
+      - "${WEBAPP_BIND:-127.0.0.1}:${WEBAPP_PORT:-8088}:8080"
 
     volumes:
       - ../config:/config:z            # config.toml + unbound-client.conf

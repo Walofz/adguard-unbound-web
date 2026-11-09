@@ -6,7 +6,7 @@ Stack 3 container ที่ link กันใน docker network:
 |---|---|---|
 | `adguard` | DNS front-end + บล็อกโฆษณา (cache off) → forward ไป unbound | 53, 3001 |
 | `unbound` | recursive resolver + DNSSEC (config: `docker/unbound.conf`) | internal 53/8953 |
-| `unbound-web` | dashboard + query log (FastAPI) | 8088 |
+| `unbound-web` | dashboard + query log (FastAPI) | 8088 (ตั้งได้ด้วย `WEBAPP_PORT`) |
 
 flow: client → AdGuard (block) → unbound (cache + DNSSEC) → upstream
 
