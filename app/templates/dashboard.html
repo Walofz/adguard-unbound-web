@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Unbound — Dashboard</title>
+    <script>
+        // ตั้งธีมก่อน render เพื่อกันจอกะพริบ
+        try {
+            const t = localStorage.getItem('unbound-theme');
+            if (t) document.documentElement.dataset.theme = t;
+            else if (matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
+        } catch (_) { }
+    </script>
+    <style>
+        :root {
+            --bg: #f2f4f7;
+            --panel: #ffffff;
+            --panel2: #f3f5f8;
+            --border: #e3e8ee;
+            --text: #2f3439;
+            --muted: #7b8794;
+            --accent: #67b279;
+            --good: #4caf6d;
+            --warn: #f2a33c;
+            --bad: #e05252;
+            --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+            color-scheme: light;
+        }
+
+        [data-theme="dark"] {
+            --bg: #14181d;
+            --panel: #1c2229;
+            --panel2: #232b33;
+            --border: #2b333d;
+            --text: #e6edf3;
+            --muted: #8b98a5;
+            --accent: #67b279;
+            --good: #67b279;
+            --warn: #f2a33c;
+            --bad: #e05252;
+            --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 1em;
+            padding: .9em 1.4em;
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            flex-wrap: wrap
+        }
+
+        .topbar h1 {
+            font-size: 1em;
+            margin: 0;
+            font-weight: 600
+        }
+
+        .topbar .spacer {
+            flex: 1
+        }
+
+        .topbar .muted {
+            color: var(--muted);
+            font-size: .85em
+        }
+
+        .topbar button {
+            background: var(--panel2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: .45em .9em;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .85em
+        }
+
+        .topbar button:hover {
+            background: #252a35
+        }
+
+        .topbar button.danger {
+            color: var(--bad);
+            border-color: #4a2020
+        }
+
+        .topbar button.danger:hover {
+            background: #3a1515
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.4em
+        }
+
+        .grid {
+            display: grid;
+            gap: 1em
+        }
+
+        .grid.cards {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1em 1.2em
+        }
+
+        .card .label {
+            color: var(--muted);
+            font-size: .75em;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            font-weight: 600
+        }
+
+        .card .value {
+            font-size: 1.9em;
+            font-weight: 700;
+            margin-top: .25em;
+            font-variant-numeric: tabular-nums
+        }
+
+        .card .sub {
+            color: var(--muted);
+            font-size: .8em;
+            margin-top: .2em
+        }
+
+        .value.good {
+            color: var(--good)
+        }
+
+        .value.warn {
+            color: var(--warn)
+        }
+
+        .value.bad {
+            color: var(--bad)
+        }
+
+        .bar {
+            height: 8px;
+            background: var(--panel2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: .5em
+        }
+
+        .bar>span {
+            display: block;
+            height: 100%;
+            background: var(--accent);
+            transition: width .4s
+        }
+
+        .bar.good>span {
+            background: var(--good)
+        }
+
+        .bar.warn>span {
+            background: var(--warn)
+        }
+
+        .bar.bad>span {
+            background: var(--bad)
+        }
+
+        .list {
+            margin-top: .8em
+        }
+
+        .list .row {
+            display: grid;
+            grid-template-columns: 70px 1fr 80px;
+            gap: .6em;
+            align-items: center;
+            padding: .35em 0;
+            font-family: var(--mono);
+            font-size: .82em
+        }
+
+        .list .row .k {
+            color: var(--muted)
+        }
+
+        .list .row .v {
+            text-align: right;
+            font-variant-numeric: tabular-nums
+        }
+
+        .list .row .b {
+            height: 6px;
+            background: var(--panel2);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .list .row .b>span {
+            display: block;
+            height: 100%;
+            background: var(--accent)
+        }
+
+        .err {
+            background: #3a1515;
+            border: 1px solid #5a2020;
+            color: #ffb4b4;
+            padding: .8em 1em;
+            border-radius: 8px;
+            margin-bottom: 1em;
+            font-family: var(--mono);
+            font-size: .85em;
+            white-space: pre-wrap
+        }
+
+        h2 {
+            font-size: .9em;
+            margin: 1.6em 0 .8em;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em
+        }
+
+        h2:first-of-type {
+            margin-top: 0
+        }
+
+        .small-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: .6em;
+            margin-top: .8em
+        }
+
+        .small-grid .item {
+            background: var(--panel2);
+            padding: .6em .8em;
+            border-radius: 6px
+        }
+
+        .small-grid .item .l {
+            color: var(--muted);
+            font-size: .7em;
+            text-transform: uppercase
+        }
+
+        .small-grid .item .v {
+            font-size: 1.1em;
+            font-weight: 600;
+            font-family: var(--mono);
+            margin-top: .15em
+        }
+
+        pre.raw {
+            background: var(--panel);
+            padding: 1em;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: .78em;
+            overflow: auto;
+            max-height: 300px
+        }
+
+        /* ---------- AdGuard-style surface ---------- */
+        .topbar {
+            box-shadow: 0 1px 2px rgba(16, 24, 40, .05)
+        }
+
+        .card {
+            box-shadow: var(--shadow);
+            transition: box-shadow .18s, transform .18s
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 18px rgba(16, 24, 40, .10)
+        }
+
+        [data-theme="dark"] .card:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .35)
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: .55em
+        }
+
+        .brand-logo {
+            width: 26px;
+            height: 26px;
+            color: var(--accent);
+            flex: none
+        }
+
+        .brand h1 {
+            font-size: 1.05em;
+            letter-spacing: -.01em
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .35em;
+            padding: .2em .65em;
+            border-radius: 999px;
+            font-size: .72em;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            white-space: nowrap
+        }
+
+        .pill.ok {
+            color: var(--good);
+            border-color: rgba(76, 175, 109, .35);
+            background: rgba(76, 175, 109, .12)
+        }
+
+        .pill.ok::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--good)
+        }
+
+        .pill.bad {
+            color: var(--bad);
+            border-color: rgba(224, 82, 82, .35)
+        }
+
+        #themeBtn,
+        #refreshBtn {
+            min-width: 42px
+        }
+
+        .err {
+            background: #fdecec;
+            border-color: #f5c2c2;
+            color: #b42318
+        }
+
+        [data-theme="dark"] .err {
+            background: #3a1515;
+            border-color: #5a2020;
+            color: #ffb4b4
+        }
+
+        .topbar button.danger {
+            border-color: #f0caca
+        }
+
+        .topbar button.danger:hover {
+            background: #fdf1f1
+        }
+
+        [data-theme="dark"] .topbar button.danger {
+            border-color: #4a2020
+        }
+
+        [data-theme="dark"] .topbar button.danger:hover {
+            background: #3a1515
+        }
+
+        .callout {
+            background: rgba(242, 163, 60, .10);
+            border: 1px solid rgba(242, 163, 60, .38);
+            border-radius: 10px;
+            padding: 1em 1.2em;
+            margin-bottom: 1.2em;
+            font-size: .9em
+        }
+
+        .callout h3 {
+            margin: 0 0 .4em;
+            font-size: .95em
+        }
+
+        .callout p {
+            margin: .35em 0
+        }
+
+        .callout pre {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .7em .9em;
+            overflow: auto;
+            font-family: var(--mono);
+            font-size: .85em;
+            margin: .6em 0
+        }
+
+        .chart-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 1em;
+            flex-wrap: wrap
+        }
+
+        .chart-meta {
+            display: flex;
+            align-items: center;
+            gap: .6em;
+            font-size: .8em
+        }
+
+        .spark {
+            display: block;
+            width: 100%;
+            height: 160px;
+            margin-top: .6em
+        }
+
+        .list .row .b>span.good {
+            background: var(--good)
+        }
+
+        .list .row .b>span.warn {
+            background: var(--warn)
+        }
+
+        .list .row .b>span.bad {
+            background: var(--bad)
+        }
+
+        .empty {
+            color: var(--muted);
+            font-size: .88em;
+            padding: .6em 0
+        }
+
+        .raw-card {
+            padding: 1em 1.2em
+        }
+
+        .raw-card summary {
+            cursor: pointer;
+            color: var(--muted);
+            font-size: .85em;
+            font-weight: 600;
+            list-style: none
+        }
+
+        .raw-card summary::-webkit-details-marker {
+            display: none
+        }
+
+        .raw-card summary::before {
+            content: "▸ "
+        }
+
+        .raw-card[open] summary::before {
+            content: "▾ "
+        }
+
+        .toast {
+            position: fixed;
+            right: 1.2em;
+            bottom: 1.2em;
+            max-width: min(480px, calc(100vw - 2.4em));
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 10px;
+            padding: .9em 1.1em;
+            box-shadow: 0 10px 30px rgba(16, 24, 40, .18);
+            font-size: .88em;
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            transition: opacity .2s, transform .2s;
+            z-index: 50;
+            white-space: pre-wrap
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .toast.bad {
+            border-left-color: var(--bad)
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        @media(max-width:600px) {
+            .card .value {
+                font-size: 1.5em
+            }
+
+            .topbar {
+                padding: .7em 1em
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <div class="brand">
+            <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"></path>
+            </svg>
+            <h1>Unbound</h1>
+        </div>
+        <span class="pill {{ 'ok' if s else 'bad' }}" id="statusPill">{{ 'online' if s else 'offline' }}</span>
+        <span class="muted" id="uptime">⏱ {{ s.uptime_h if s else '—' }}</span>
+        <div class="spacer"></div>
+        <span class="muted">👤 {{ user }}</span>
+        <button id="themeBtn" title="สลับธีม">🌙</button>
+        <button id="refreshBtn" title="หยุด/เริ่มอัปเดตอัตโนมัติ">⏸</button>
+        <button id="reloadBtn">↻ Reload</button>
+        <button id="flushBtn" class="danger">🧹 Flush</button>
+        <a href="/queries" style="color:var(--accent);text-decoration:none;font-size:.85em;font-weight:600">Query log</a>
+        <a href="/change-password" style="color:var(--muted);text-decoration:none;font-size:.85em">password</a>
+        <a href="/logout" style="color:var(--muted);text-decoration:none;font-size:.85em">logout</a>
+    </div>
+
+    <div class="container">
+        {% if err %}<div class="err">⚠ {{ err }}</div>{% endif %}
+
+        <div class="callout{{ ' hidden' if (not s or s.extended) }}" id="extHint">
+            <h3>⚠ ยังไม่ได้เปิด extended-statistics</h3>
+            <p>ตัวเลข Query Types / Response Codes / Cache Sizes / DNSSEC บางตัวจะว่าง เพราะ unbound ปลายทางไม่ได้เก็บสถิติเพิ่ม</p>
+            <p>เพิ่มที่ <code>/etc/unbound/unbound.conf</code> ใต้บล็อก <code>server:</code> ของเครื่องที่รัน unbound</p>
+            <pre>server:
+    extended-statistics: yes</pre>
+            <p>แล้วสั่ง <code>sudo unbound-control reload</code> หรือ <code>sudo systemctl reload unbound</code></p>
+        </div>
+
+        {% if s %}
+        <h2>ภาพรวม</h2>
+        <div class="grid cards">
+            <div class="card">
+                <div class="label">Queries / sec</div>
+                <div class="value" data-k="qps">{{ s.qps }}</div>
+                <div class="sub">เฉลี่ยตลอด uptime</div>
+            </div>
+            <div class="card">
+                <div class="label">Cache Hit Ratio</div>
+                <div class="value {{ 'good' if s.hit_ratio >= 80 else ('warn' if s.hit_ratio >= 50 else 'bad') }}"
+                    id="hitRatio">{{ s.hit_ratio }}%</div>
+                <div class="bar {{ 'good' if s.hit_ratio >= 80 else ('warn' if s.hit_ratio >= 50 else 'bad') }}"
+                    id="hitRatioBarWrap">
+                    <span id="hitRatioBar" style="width:{{ s.hit_ratio }}%"></span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="label">Total Queries</div>
+                <div class="value" data-k="queries" data-fmt="1">{{ s.queries | num }}</div>
+                <div class="sub" id="hitsMiss">Hits {{ s.hits | num }} · Miss {{ s.miss | num }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Uptime</div>
+                <div class="value" data-k="uptime_h" style="font-size:1.5em">{{ s.uptime_h }}</div>
+                <div class="sub">ตั้งแต่ daemon start</div>
+            </div>
+        </div>
+
+        <h2>อัตราการตอบสนอง</h2>
+        <div class="card">
+            <div class="chart-head">
+                <div>
+                    <div class="label">Queries / sec (ปัจจุบัน)</div>
+                    <div class="value" id="qpsNow" style="font-size:1.6em">{{ s.qps }}</div>
+                    <div class="sub">คำนวณจากส่วนต่างของจำนวน query ระหว่างรอบรีเฟรช</div>
+                </div>
+                <div class="chart-meta">
+                    <span class="muted">60 ตัวอย่างล่าสุด</span>
+                    <span class="pill" id="lastUpdated">—</span>
+                </div>
+            </div>
+            <svg class="spark" id="spark" viewBox="0 0 600 140" preserveAspectRatio="none" aria-label="กราฟ QPS">
+                <defs>
+                    <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--accent)" stop-opacity=".35" />
+                        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
+                    </linearGradient>
+                </defs>
+                <g stroke="currentColor" stroke-opacity=".08" stroke-width="1">
+                    <line x1="0" y1="35" x2="600" y2="35" />
+                    <line x1="0" y1="70" x2="600" y2="70" />
+                    <line x1="0" y1="105" x2="600" y2="105" />
+                </g>
+                <path id="sparkArea" fill="url(#sparkFill)" d=""></path>
+                <path id="sparkLine" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" d=""></path>
+            </svg>
+        </div>
+
+        <h2>ประสิทธิภาพ</h2>
+        <div class="grid two">
+            <div class="card">
+                <div class="label">Recursion Time</div>
+                <div class="small-grid">
+                    <div class="item">
+                        <div class="l">Average</div>
+                        <div class="v" data-k="recursion_time_avg" data-unit=" ms">{{ s.recursion_time_avg | num }} ms</div>
+                    </div>
+                    <div class="item">
+                        <div class="l">Median</div>
+                        <div class="v" data-k="recursion_time_median" data-unit=" ms">{{ s.recursion_time_median | num }} ms</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="label">Cache Sizes</div>
+                <div class="sub">จำนวน entry ในแคช (ไม่ใช่ขนาดหน่วยความจำ)</div>
+                <div class="small-grid">
+                    <div class="item">
+                        <div class="l">Msg</div>
+                        <div class="v" data-k="msg_cache" data-fmt="1">{{ s.msg_cache | num }}</div>
+                    </div>
+                    <div class="item">
+                        <div class="l">RRset</div>
+                        <div class="v" data-k="rrset_cache" data-fmt="1">{{ s.rrset_cache | num }}</div>
+                    </div>
+                    <div class="item">
+                        <div class="l">Infra</div>
+                        <div class="v" data-k="infra_cache" data-fmt="1">{{ s.infra_cache | num }}</div>
+                    </div>
+                    <div class="item">
+                        <div class="l">Key</div>
+                        <div class="v" data-k="key_cache" data-fmt="1">{{ s.key_cache | num }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Response Codes</h2>
+        <div class="card">
+            {% set rc_total = (s.rcodes.values() | sum) or 1 %}
+            <div class="list" id="rcodesList">
+                {% for k, v in s.rcodes | dictsort(by='value', reverse=true) %}
+                {% if v > 0 %}
+                <div class="row">
+                    <span class="k">{{ k }}</span>
+                    <span class="b"><span class="{{ 'good' if k == 'NOERROR' else ('bad' if k == 'SERVFAIL' else ('warn' if k in ['NXDOMAIN', 'REFUSED'] else '')) }}"
+                            style="width:{{ (v / rc_total * 100) | round(1) }}%"></span></span>
+                    <span class="v">{{ v | num }}</span>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="empty{{ ' hidden' if s.rcodes }}" id="rcodesEmpty">ยังไม่มีข้อมูล response code</div>
+        </div>
+
+        <h2>Query Types</h2>
+        <div class="card">
+            {% set qt_total = (s.qtypes.values() | sum) or 1 %}
+            {% set ns = namespace(shown=0) %}
+            <div class="list" id="qtypesList">
+                {% for k, v in s.qtypes | dictsort(by='value', reverse=true) %}
+                {% if v > 0 and ns.shown < 12 %}
+                {% set ns.shown = ns.shown + 1 %}
+                <div class="row">
+                    <span class="k">{{ k }}</span>
+                    <span class="b"><span class="accent" style="width:{{ (v / qt_total * 100) | round(1) }}%"></span></span>
+                    <span class="v">{{ v | num }}</span>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="empty{{ ' hidden' if s.qtypes }}" id="qtypesEmpty">ยังไม่มีข้อมูล query type</div>
+        </div>
+
+    <h2>DNSSEC & Transport</h2>
+    <div class="grid two">
+        <div class="card">
+            <div class="label">DNSSEC</div>
+            <div class="small-grid">
+                <div class="item">
+                    <div class="l">Secure</div>
+                    <div class="v good" data-k="secure" data-fmt="1">{{ s.secure | num }}</div>
+                </div>
+                <div class="item">
+                    <div class="l">Bogus</div>
+                    <div class="v {{ 'bad' if (s.bogus or 0) > 0 else '' }}" data-k="bogus" data-fmt="1">{{ s.bogus | num }}</div>
+                </div>
+                <div class="item">
+                    <div class="l">EDNS</div>
+                    <div class="v" data-k="edns" data-fmt="1">{{ s.edns | num }}</div>
+                </div>
+                <div class="item">
+                    <div class="l">DO bit</div>
+                    <div class="v" data-k="do" data-fmt="1">{{ s.do | num }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="label">Transport</div>
+            <div class="small-grid">
+                <div class="item">
+                    <div class="l">UDP</div>
+                    <div class="v" data-k="udp" data-fmt="1">{{ s.udp | num }}</div>
+                </div>
+                <div class="item">
+                    <div class="l">TCP</div>
+                    <div class="v" data-k="tcp" data-fmt="1">{{ s.tcp | num }}</div>
+                </div>
+                <div class="item">
+                    <div class="l">TLS</div>
+                    <div class="v" data-k="tls" data-fmt="1">{{ s.tls | num }}</div>
+                </div>
+                <div class="item">
+                    <div class="l">IPv6</div>
+                    <div class="v" data-k="ipv6" data-fmt="1">{{ s.ipv6 | num }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <details class="card raw-card">
+        <summary>Raw status (unbound-control status)</summary>
+        <pre class="raw" style="border:0;border-radius:0;padding:.6em 0 0;background:transparent">{{ status }}</pre>
+    </details>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        const REFRESH_MS = 5000;
+        const $ = id => document.getElementById(id);
+        const fmtInt = v => v == null ? 'n/a' : Number(v).toLocaleString('en-US');
+        const ratioCls = r => r >= 80 ? 'good' : r >= 50 ? 'warn' : 'bad';
+        const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        let paused = false;
+        let qpsHistory = [];
+        let lastQ = null;
+        let lastTs = 0;
+        let toastTimer = null;
+
+        function toast(text, ok = true, ms = 4000) {
+            const t = $('toast');
+            if (!t) return;
+            t.textContent = text;
+            t.className = 'toast show' + (ok ? '' : ' bad');
+            clearTimeout(toastTimer);
+            if (ms) toastTimer = setTimeout(() => { t.className = 'toast'; }, ms);
+        }
+
+        function rcodeCls(k) {
+            if (k === 'NOERROR') return 'good';
+            if (k === 'SERVFAIL') return 'bad';
+            if (k === 'NXDOMAIN' || k === 'REFUSED') return 'warn';
+            return 'accent';
+        }
+
+        function renderRows(el, data, total) {
+            if (!el) return;
+            const rows = Object.entries(data || {})
+                .filter(([, v]) => v > 0)
+                .sort((a, b) => b[1] - a[1]);
+            el.innerHTML = rows.map(([k, v]) => {
+                const w = total ? (v / total * 100) : 0;
+                return '<div class="row"><span class="k">' + esc(k) + '</span>' +
+                    '<span class="b"><span class="' + rcodeCls(k) + '" style="width:' + w.toFixed(1) + '%"></span></span>' +
+                    '<span class="v">' + fmtInt(v) + '</span></div>';
+            }).join('');
+        }
+
+        function drawSpark() {
+            const line = $('sparkLine'), area = $('sparkArea');
+            if (!line || !area) return;
+            const w = 600, h = 140, pad = 8;
+            const data = qpsHistory.length ? qpsHistory.slice() : [0];
+            if (data.length === 1) data.push(data[0]);
+            const max = Math.max(1, ...data);
+            const step = data.length > 1 ? (w - pad * 2) / (data.length - 1) : 0;
+            const pts = data.map((v, i) => [pad + i * step, h - pad - (v / max) * (h - pad * 2)]);
+            const path = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+            line.setAttribute('d', path);
+            area.setAttribute('d', path + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (h - pad) + ' L' + pad + ' ' + (h - pad) + ' Z');
+        }
+
+        function apply(s) {
+            document.querySelectorAll('[data-k]').forEach(el => {
+                const k = el.dataset.k;
+                if (!(k in s)) return;
+                const v = s[k];
+                if (v == null) {
+                    el.textContent = 'n/a';
+                    el.classList.add('metric-na');
+                    return;
+                }
+                el.classList.remove('metric-na');
+                el.textContent = (el.dataset.fmt === '1' ? fmtInt(v) : String(v)) + (el.dataset.unit || '');
+            });
+
+            const hv = $('hitRatio'), hb = $('hitRatioBar'), hw = $('hitRatioBarWrap');
+            const cls = ratioCls(s.hit_ratio);
+            if (hv) { hv.textContent = s.hit_ratio + '%'; hv.className = 'value ' + cls; }
+            if (hb) { hb.style.width = Math.min(100, s.hit_ratio) + '%'; hb.className = cls; }
+            if (hw) hw.className = 'bar ' + cls;
+
+            const hm = $('hitsMiss');
+            if (hm) hm.textContent = 'Hits ' + fmtInt(s.hits) + ' · Miss ' + fmtInt(s.miss);
+
+            const up = $('uptime');
+            if (up) up.textContent = '⏱ ' + s.uptime_h;
+
+            const pill = $('statusPill');
+            if (pill) { pill.textContent = 'online'; pill.className = 'pill ok'; }
+
+            const rcTotal = Object.values(s.rcodes || {}).reduce((a, b) => a + b, 0) || 1;
+            const qtTotal = Object.values(s.qtypes || {}).reduce((a, b) => a + b, 0) || 1;
+            renderRows($('rcodesList'), s.rcodes, rcTotal);
+            renderRows($('qtypesList'), s.qtypes, qtTotal);
+            if ($('rcodesEmpty')) $('rcodesEmpty').classList.toggle('hidden', !!Object.keys(s.rcodes || {}).length);
+            if ($('qtypesEmpty')) $('qtypesEmpty').classList.toggle('hidden', !!Object.keys(s.qtypes || {}).length);
+            if ($('extHint')) $('extHint').classList.toggle('hidden', !!s.extended);
+
+            // ประวัติ QPS จากส่วนต่างของจำนวน query ระหว่างรอบรีเฟรช
+            const now = Date.now();
+            const dt = (now - lastTs) / 1000;
+            if (lastQ != null && dt > 0.5 && s.queries >= lastQ) {
+                qpsHistory.push((s.queries - lastQ) / dt);
+                if (qpsHistory.length > 60) qpsHistory.shift();
+            }
+            lastQ = s.queries;
+            lastTs = now;
+
+            const qn = $('qpsNow');
+            if (qn) qn.textContent = (qpsHistory.length ? qpsHistory[qpsHistory.length - 1] : s.qps).toFixed(1);
+
+            const lu = $('lastUpdated');
+            if (lu) lu.textContent = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            drawSpark();
+        }
+
+        async function refresh() {
+            if (paused) return;
+            try {
+                const r = await fetch('/api/stats', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                if (r.status === 401) { location.href = '/login'; return; }
+                if (!r.ok) return;
+                apply(await r.json());
+            } catch (_) { /* เงียบไว้ รอรอบถัดไป */ }
+        }
+
+        async function doAction(path, message) {
+            if (!confirm(message)) return;
+            try {
+                const r = await fetch(path, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (r.status === 401) { location.href = '/login'; return; }
+                const j = await r.json().catch(() => ({}));
+                const ok = r.ok && j.ok !== false;
+                toast(ok ? (j.out || 'สำเร็จ') : (j.err || j.detail || ('ล้มเหลว (rc=' + (j.rc ?? '?') + ')')), ok);
+                if (ok) refresh();
+            } catch (_) {
+                toast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้', false);
+            }
+        }
+
+        const root = document.documentElement;
+        function applyTheme(t) {
+            root.dataset.theme = t;
+            const b = $('themeBtn');
+            if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
+        }
+        applyTheme(root.dataset.theme || 'light');
+
+        $('themeBtn').addEventListener('click', () => {
+            const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem('unbound-theme', next); } catch (_) { }
+            applyTheme(next);
+        });
+
+        $('refreshBtn').addEventListener('click', (e) => {
+            paused = !paused;
+            e.currentTarget.textContent = paused ? '▶' : '⏸';
+            e.currentTarget.classList.toggle('danger', paused);
+            if (!paused) refresh();
+        });
+
+        $('reloadBtn').addEventListener('click', () => doAction('/reload', 'Reload Unbound?'));
+        $('flushBtn').addEventListener('click', () => doAction('/flush', 'Flush cache (bogus/negative)?'));
+
+        refresh();
+        setInterval(refresh, REFRESH_MS);
+    </script>
+</body>
+
+</html>

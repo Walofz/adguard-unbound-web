@@ -1,0 +1,17 @@
+# build context คือ repo root (compose: context: ..)
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+
+# ห้ามส่ง config ที่มีความลับเข้า docker daemon
+config
+logs
+.env
+adguard
+
+# เอกสาร/ไฟล์ที่ไม่ต้องใช้ใน build
+docker/README.md
+docker/legacy

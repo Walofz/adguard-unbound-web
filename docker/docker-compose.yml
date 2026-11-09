@@ -1,0 +1,119 @@
+services:
+  unbound:
+    build:
+      context: ..
+      dockerfile: docker/Unbound.Dockerfile
+    image: unbound-local:dev
+    container_name: unbound-local
+    restart: unless-stopped
+
+    # ไม่ publish port 53 — AdGuard Home เป็น front-end แล้ว forward มาที่นี่
+    expose:
+      - "53"
+
+    volumes:
+      - ../logs:/logs:z                  # query log (webapp อ่านตัวเดียวกันแบบ ro)
+      - unbound-data:/var/lib/unbound    # root.key (RFC5011) + root.hints
+
+    environment:
+      TZ: Asia/Bangkok
+
+    networks:
+      dnslink:
+        ipv4_address: ${UNBOUND_IP:-172.30.99.10}
+
+    healthcheck:
+      test: ["CMD", "unbound-control", "-c", "/etc/unbound/unbound.conf", "-s", "127.0.0.1", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard-home
+    restart: unless-stopped
+    depends_on:
+      unbound:
+        condition: service_healthy
+    ports:
+      - "${DNS_BIND:-127.0.0.1}:${DNS_PORT:-53}:53/udp"
+      - "${DNS_BIND:-127.0.0.1}:${DNS_PORT:-53}:53/tcp"
+      - "${AGH_BIND:-127.0.0.1}:${AGH_PORT:-3001}:3000"
+    volumes:
+      - ../adguard/work:/opt/adguardhome/work:z
+      - ../adguard/conf:/opt/adguardhome/conf:z
+    environment:
+      TZ: Asia/Bangkok
+    networks:
+      - dnslink
+
+  # one-shot: ตั้งค่า AdGuard Home (cache off, upstream=unbound, เปิด filter)
+  # รันด้วย: docker compose --profile setup run --rm adguard-setup
+  adguard-setup:
+    profiles: ["setup"]
+    image: python:3.12-slim
+    depends_on:
+      adguard:
+        condition: service_started
+      unbound:
+        condition: service_healthy
+    volumes:
+      - ./adguard-setup.py:/setup.py:ro
+    environment:
+      AGH_URL: http://adguard:3000
+      AGH_USER: ${AGH_USER:-admin}
+      AGH_PASSWORD: ${AGH_PASSWORD:-}
+      UNBOUND_UPSTREAM: ${UNBOUND_IP:-172.30.99.10}:53
+    command: ["python", "/setup.py"]
+    networks:
+      - dnslink
+
+  unbound-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: unbound-web:dev
+    container_name: unbound-web
+    restart: unless-stopped
+
+    depends_on:
+      unbound:
+        condition: service_healthy
+
+    # bind แค่ localhost โดย default — เปิดให้ LAN เข้าถึงด้วย WEBAPP_BIND=0.0.0.0
+    ports:
+      - "${WEBAPP_BIND:-127.0.0.1}:8088:8080"
+
+    volumes:
+      - ../config:/config:z            # config.toml + unbound-client.conf
+      - ../logs:/logs:ro,z             # query log จาก service unbound
+
+    # ให้ uid/gid ตรงกับ host owner ของ ../config
+    user: "${WEBAPP_UID:-1000}:${WEBAPP_GID:-1000}"
+
+    environment:
+      TZ: Asia/Bangkok
+      QUERY_LOG_FILE: /logs/unbound.log
+      # ใช้ตอน bootstrap config.toml ครั้งแรกเท่านั้น
+      CONTROL_INTERFACE: ${UNBOUND_IP:-172.30.99.10}
+      CONTROL_USE_CERT: "no"
+
+    networks:
+      - dnslink
+
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  dnslink:
+    ipam:
+      config:
+        - subnet: ${DNS_SUBNET:-172.30.99.0/24}
+
+volumes:
+  unbound-data:
