@@ -100,6 +100,23 @@ dig @127.0.0.1 dnssec-failed.org | grep status
 4. **SELinux** (Fedora/RHEL) — compose ใส่ `:z` ให้แล้ว
 5. **internet ตอน build** — ต้องดาวน์โหลด apt packages + root hints
 
+### เปิดให้ LAN ใช้งานทั้งหมด
+
+ใส่ใน `docker/.env` แล้ว `docker compose up -d`:
+
+```dotenv
+DNS_BIND=0.0.0.0
+AGH_BIND=0.0.0.0
+WEBAPP_BIND=0.0.0.0
+```
+
+- **Linux**: ถ้า `0.0.0.0:53` ชนกับ systemd-resolved ให้ระบุ IP LAN ของเครื่อง
+  (เช่น `DNS_BIND=192.168.1.10`) หรือปิด stub listener
+- **WSL2 + Docker Desktop**: ผูก `0.0.0.0:53` ไม่ได้ (Docker คืน error 500)
+  ให้ระบุ IP ของ WSL หรือทำ port forwarding ฝั่ง Windows
+- เปิดสู่ LAN แล้วควรเปลี่ยนรหัสทั้งสอง UI และพิจารณา HTTPS
+  (`session_https_only = true` ใน `config/config.toml` เมื่อมี reverse proxy TLS)
+
 > หมายเหตุ WSL2/Docker Desktop: port ที่ publish เข้าถึงจาก Windows ที่ `127.0.0.1` ได้
 > แต่เครื่องอื่นใน LAN ต้องทำ port forwarding ฝั่ง Windows ก่อน
 
