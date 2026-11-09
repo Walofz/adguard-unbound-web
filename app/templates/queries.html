@@ -431,7 +431,7 @@ tail -f logs/unbound.log</pre>
                 '<td class="mono name" title="' + esc(it.qname) + '">' + esc(it.qname) + '</td>' +
                 '<td><span class="type">' + esc(it.qtype) + '</span></td>' +
                 '<td>' + badge(it.rcode) + '</td>' +
-                '<td class="num">' + (it.elapsed == null ? '—' : (it.elapsed * 1000).toFixed(1)) + '</td>' +
+                '<td class="num">' + (it.elapsed == null ? '—' : (it.elapsed * 1000).toFixed(4)) + '</td>' +
                 '<td>' + (it.cached == null ? '—' : (it.cached ? 'cache' : 'miss')) + '</td>' +
                 '<td class="num">' + (it.size == null ? '—' : it.size) + '</td>' +
                 '</tr>').join('');
