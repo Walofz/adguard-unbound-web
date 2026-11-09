@@ -100,9 +100,9 @@ dig @127.0.0.1 dnssec-failed.org | grep status
 4. **SELinux** (Fedora/RHEL) — compose ใส่ `:z` ให้แล้ว
 5. **internet ตอน build** — ต้องดาวน์โหลด apt packages + root hints
 
-### เปิดให้ LAN ใช้งานทั้งหมด
+### เปิดให้ LAN ใช้งานทั้งหมด (Ubuntu)
 
-ใส่ใน `docker/.env` แล้ว `docker compose up -d`:
+**1) ตั้งค่า `docker/.env`**
 
 ```dotenv
 DNS_BIND=0.0.0.0
@@ -110,15 +110,60 @@ AGH_BIND=0.0.0.0
 WEBAPP_BIND=0.0.0.0
 ```
 
-- **Linux**: ถ้า `0.0.0.0:53` ชนกับ systemd-resolved ให้ระบุ IP LAN ของเครื่อง
-  (เช่น `DNS_BIND=192.168.1.10`) หรือปิด stub listener
-- **WSL2 + Docker Desktop**: ผูก `0.0.0.0:53` ไม่ได้ (Docker คืน error 500)
-  ให้ระบุ IP ของ WSL หรือทำ port forwarding ฝั่ง Windows
-- เปิดสู่ LAN แล้วควรเปลี่ยนรหัสทั้งสอง UI และพิจารณา HTTPS
-  (`session_https_only = true` ใน `config/config.toml` เมื่อมี reverse proxy TLS)
+**2) ปิด stub listener ของ systemd-resolved**
 
-> หมายเหตุ WSL2/Docker Desktop: port ที่ publish เข้าถึงจาก Windows ที่ `127.0.0.1` ได้
-> แต่เครื่องอื่นใน LAN ต้องทำ port forwarding ฝั่ง Windows ก่อน
+`0.0.0.0:53` จะชนกับ `127.0.0.53:53` ของ systemd-resolved ถ้าไม่ปิด:
+
+```bash
+sudo mkdir -p /etc/systemd/resolved.conf.d
+sudo tee /etc/systemd/resolved.conf.d/90-no-stub.conf >/dev/null <<'EOF'
+[Resolve]
+DNSStubListener=no
+EOF
+sudo systemctl restart systemd-resolved
+
+# ให้ host ยัง resolve ได้ (ชี้ resolv.conf ไป upstream ของ resolved แทน stub)
+sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+```
+
+ยืนยันว่า port ว่าง:
+
+```bash
+sudo ss -ltnup | grep ':53 ' || echo "port 53 ว่าง"
+```
+
+**3) recreate stack**
+
+```bash
+cd docker
+docker compose down
+docker compose up -d
+docker compose ps
+```
+
+**4) เปิด firewall (ถ้าใช้ ufw)**
+
+```bash
+sudo ufw allow 53/udp
+sudo ufw allow 53/tcp
+sudo ufw allow 8088/tcp
+sudo ufw allow 3001/tcp
+```
+
+**5) ทดสอบ**
+
+```bash
+dig @127.0.0.1 example.com
+dig @<Ubuntu-LAN-IP> example.com        # จากเครื่องอื่นใน LAN
+curl -I http://127.0.0.1:8088
+curl -I http://127.0.0.1:3001
+```
+
+> **ทางเลือกที่ไม่ต้องปิด resolved:** ใช้ `DNS_BIND=<IP LAN ของเครื่อง>` เช่น `192.168.1.10`
+> — bind เฉพาะ IP นั้น ไม่ชนกับ `127.0.0.53` และ LAN ใช้งานได้ปกติ
+>
+> เปิดสู่ LAN แล้วควรเปลี่ยนรหัสทั้งสอง UI และพิจารณา HTTPS
+> (`session_https_only = true` ใน `config/config.toml` เมื่ออยู่หลัง reverse proxy TLS)
 
 ---
 
