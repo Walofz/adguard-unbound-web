@@ -15,45 +15,47 @@
     </script>
     <style>
         :root {
-            --bg: #f2f4f7;
-            --panel: #ffffff;
-            --panel2: #f3f5f8;
-            --border: #e3e8ee;
-            --text: #2f3439;
-            --muted: #7b8794;
-            --accent: #67b279;
-            --good: #4caf6d;
-            --warn: #f2a33c;
-            --bad: #e05252;
+            --bg: #f1f4f2;
+            --panel: #fbfcfb;
+            --panel2: #f3f6f4;
+            --border: #cfd9d3;
+            --text: #172421;
+            --muted: #5f726a;
+            --accent: #35b26d;
+            --accent-strong: #24975f;
+            --accent-soft: rgba(53, 178, 109, 0.12);
+            --good: #2fa66b;
+            --warn: #d39a2f;
+            --bad: #d95757;
             --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-            --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+            --shadow: 0 8px 24px rgba(23, 36, 33, 0.06);
             color-scheme: light;
         }
 
         [data-theme="dark"] {
-            --bg: #14181d;
-            --panel: #1c2229;
-            --panel2: #232b33;
-            --border: #2b333d;
-            --text: #e6edf3;
-            --muted: #8b98a5;
-            --accent: #67b279;
-            --good: #67b279;
-            --warn: #f2a33c;
-            --bad: #e05252;
-            --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+            --bg: #0d1518;
+            --panel: rgba(17, 27, 31, 0.92);
+            --panel2: #16252d;
+            --border: #23353f;
+            --text: #e9f0f2;
+            --muted: #9cb0b8;
+            --accent: #78d7a2;
+            --accent-strong: #60c892;
+            --accent-soft: rgba(120, 215, 162, 0.14);
+            --good: #8de3b4;
+            --warn: #f3bc5d;
+            --bad: #ff8d8d;
+            --shadow: 0 14px 32px rgba(2, 6, 10, 0.32);
             color-scheme: dark;
         }
 
-        * {
-            box-sizing: border-box
-        }
+        * { box-sizing: border-box }
 
         body {
             margin: 0;
             background: var(--bg);
             color: var(--text);
-            font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif
+            font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
         }
 
         .topbar {
@@ -63,20 +65,134 @@
             padding: .9em 1.4em;
             border-bottom: 1px solid var(--border);
             background: var(--panel);
+            backdrop-filter: blur(8px);
             position: sticky;
             top: 0;
             z-index: 10;
-            flex-wrap: wrap
+            flex-wrap: wrap;
+            box-shadow: 0 1px 0 rgba(23, 36, 33, .04);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: var(--panel);
         }
 
         .topbar h1 {
-            font-size: 1em;
+            font-size: 1.02em;
             margin: 0;
-            font-weight: 600
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
-        .topbar .spacer {
-            flex: 1
+        .topbar .spacer { flex: 1 }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: .5em;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: .52em .85em;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .8em;
+            font-weight: 600;
+            transition: all .15s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(53, 178, 109, 0.1);
+            border-color: rgba(53, 178, 109, 0.28);
+            color: var(--accent-strong);
+        }
+
+        .user-menu {
+            position: relative;
+            z-index: 20;
+        }
+
+        .user-menu-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: .45em;
+            padding: .5em .7em;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+            font-size: .82em;
+            cursor: pointer;
+        }
+
+        .user-menu-trigger:hover,
+        .user-menu-trigger[aria-expanded="true"] {
+            border-color: var(--border);
+            background: var(--panel2);
+        }
+
+        .user-menu-trigger .caret {
+            color: var(--muted);
+            transition: transform .15s ease;
+        }
+
+        .user-menu-trigger[aria-expanded="true"] .caret {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + .4em);
+            right: 0;
+            min-width: 170px;
+            padding: .35em;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .user-dropdown[hidden] {
+            display: none;
+        }
+
+        .user-dropdown:not([hidden]) {
+            display: grid;
+            gap: .15em;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: .65em .75em;
+            border-radius: 6px;
+            color: var(--text);
+            font-size: .84em;
+            text-decoration: none;
+        }
+
+        .user-dropdown a:hover {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+        }
+
+        .user-dropdown a.logout {
+            color: var(--bad);
+        }
+
+        .nav-link.primary {
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            border-color: transparent;
         }
 
         .topbar .muted {
@@ -88,29 +204,33 @@
             background: var(--panel2);
             color: var(--text);
             border: 1px solid var(--border);
-            padding: .45em .9em;
-            border-radius: 6px;
+            padding: .5em .9em;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: .85em
+            font-size: .82em;
+            transition: border-color .15s ease, background .15s ease, transform .15s ease;
         }
 
         .topbar button:hover {
-            background: #252a35
+            background: var(--panel2);
+            border-color: var(--accent);
+            transform: translateY(-1px);
         }
 
         .topbar button.danger {
             color: var(--bad);
-            border-color: #4a2020
+            border-color: rgba(217, 87, 87, 0.28);
+            background: rgba(217, 87, 87, 0.04);
         }
 
         .topbar button.danger:hover {
-            background: #3a1515
+            background: rgba(217, 87, 87, 0.08);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1.4em
+            padding: 1.4em;
         }
 
         .grid {
@@ -126,11 +246,38 @@
             grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))
         }
 
+        .focus-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+        }
+
+        .focus-section h2 {
+            margin-top: 0;
+        }
+
+        .performance-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+        }
+
+        .info-section h2 {
+            margin-top: 0;
+        }
+
+        .transport-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
         .card {
             background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1em 1.2em
+            border-radius: 16px;
+            padding: 1em 1.2em;
+            box-shadow: var(--shadow);
         }
 
         .card .label {
@@ -273,6 +420,48 @@
             text-transform: uppercase
         }
 
+        .term {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted currentColor;
+            cursor: help;
+            outline-offset: 3px;
+        }
+
+        .term::after {
+            content: attr(data-tip);
+            position: absolute;
+            left: 0;
+            bottom: calc(100% + .55em);
+            z-index: 60;
+            width: max-content;
+            max-width: min(270px, calc(100vw - 2rem));
+            padding: .6em .75em;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--text);
+            color: var(--panel);
+            box-shadow: var(--shadow);
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.4;
+            letter-spacing: 0;
+            text-transform: none;
+            white-space: normal;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(3px);
+            transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+        }
+
+        .term:hover::after,
+        .term:focus-visible::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
         .small-grid .item .v {
             font-size: 1.1em;
             font-weight: 600;
@@ -289,6 +478,55 @@
             font-size: .78em;
             overflow: auto;
             max-height: 300px
+        }
+
+        .raw-dialog {
+            width: min(760px, calc(100vw - 2rem));
+            max-height: min(80vh, 680px);
+            margin: auto;
+            padding: 1.2em;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--panel);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        .raw-dialog::backdrop {
+            background: rgba(13, 21, 24, .58);
+            backdrop-filter: blur(3px);
+        }
+
+        .raw-dialog-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1em;
+        }
+
+        .raw-dialog-head h2 {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .raw-dialog button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--panel2);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .raw-dialog pre.raw {
+            max-height: 60vh;
+            margin: 1em 0 0;
+            white-space: pre-wrap;
         }
 
         /* ---------- AdGuard-style surface ---------- */
@@ -436,6 +674,93 @@
             font-size: .8em
         }
 
+        .donut-panel {
+            display: grid;
+            grid-template-columns: minmax(180px, 220px) minmax(220px, 1fr);
+            gap: 1.2em;
+            align-items: center;
+            margin-top: .8em;
+        }
+
+        .donut-chart {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            border-radius: 50%;
+            background: conic-gradient(var(--accent) 0 100%);
+            margin: 0 auto;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        .donut-chart::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 50%;
+            background: var(--panel);
+            border: 1px solid var(--border);
+        }
+
+        .donut-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 1;
+            padding: 2em;
+        }
+
+        .donut-center .type {
+            font-size: 1.25em;
+            font-weight: 700;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .donut-center .pct {
+            font-size: .8em;
+            color: var(--muted);
+            margin-top: .25em;
+        }
+
+        .donut-center .type.small {
+            font-size: .9em;
+        }
+
+        .donut-legend {
+            display: grid;
+            gap: .55em;
+        }
+
+        .legend-item {
+            display: grid;
+            grid-template-columns: 10px 1fr auto;
+            gap: .7em;
+            align-items: center;
+            font-size: .85em;
+            color: var(--text);
+        }
+
+        .legend-swatch {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .legend-item .name {
+            color: var(--muted);
+        }
+
+        .legend-item .value {
+            font-family: var(--mono);
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+
         .spark {
             display: block;
             width: 100%;
@@ -528,6 +853,19 @@
                 padding: .7em 1em
             }
         }
+
+        @media(max-width:900px) {
+            .focus-grid,
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:600px) {
+            .transport-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -545,14 +883,24 @@
         <span class="pill {{ 'ok' if s else 'bad' }}" id="statusPill">{{ 'online' if s else 'offline' }}</span>
         <span class="muted" id="uptime">⏱ {{ s.uptime_h if s else '—' }}</span>
         <div class="spacer"></div>
-        <span class="muted">👤 {{ user }}</span>
+        <div class="user-menu" id="userMenu">
+            <button type="button" class="user-menu-trigger" id="userMenuButton" aria-expanded="false" aria-controls="userDropdown">
+                <span>👤 {{ user }}</span><span class="caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="user-dropdown" id="userDropdown" hidden>
+                <a href="/change-password">Password</a>
+                <a class="logout" href="/logout">Logout</a>
+            </div>
+        </div>
+        <div class="nav-group">
+            <a class="nav-link active" href="/">Dashboard</a>
+            <a class="nav-link" href="/queries">Query log</a>
+        </div>
         <button id="themeBtn" title="สลับธีม">🌙</button>
         <button id="refreshBtn" title="หยุด/เริ่มอัปเดตอัตโนมัติ">⏸</button>
+        <button id="rawStatusBtn" title="ดู Raw status">Raw status</button>
         <button id="reloadBtn">↻ Reload</button>
         <button id="flushBtn" class="danger">🧹 Flush</button>
-        <a href="/queries" style="color:var(--accent);text-decoration:none;font-size:.85em;font-weight:600">Query log</a>
-        <a href="/change-password" style="color:var(--muted);text-decoration:none;font-size:.85em">password</a>
-        <a href="/logout" style="color:var(--muted);text-decoration:none;font-size:.85em">logout</a>
     </div>
 
     <div class="container">
@@ -596,165 +944,155 @@
             </div>
         </div>
 
-        <h2>อัตราการตอบสนอง</h2>
-        <div class="card">
-            <div class="chart-head">
-                <div>
-                    <div class="label">Queries / sec (ปัจจุบัน)</div>
-                    <div class="value" id="qpsNow" style="font-size:1.6em">{{ s.qps }}</div>
-                    <div class="sub">คำนวณจากส่วนต่างของจำนวน query ระหว่างรอบรีเฟรช</div>
+        <div class="grid focus-grid">
+            <section class="focus-section">
+                <h2>Response Codes</h2>
+                <div class="card">
+                    <div class="chart-head">
+                        <div>
+                            <div class="label">Response Codes จาก log</div>
+                            <div class="sub">สรุป response ล่าสุด สูงสุด 1,000 รายการ</div>
+                        </div>
+                        <div class="chart-meta">
+                            <span class="muted">log records</span>
+                            <span class="pill" id="lastUpdated">—</span>
+                        </div>
+                    </div>
+                    <div class="donut-panel">
+                        <div id="donutChart" class="donut-chart" aria-label="Response code distribution">
+                            <div class="donut-center">
+                                <div id="donutType" class="type">—</div>
+                                <div id="donutPercent" class="pct">0%</div>
+                            </div>
+                        </div>
+                        <div id="donutLegend" class="donut-legend"></div>
+                    </div>
                 </div>
-                <div class="chart-meta">
-                    <span class="muted">60 ตัวอย่างล่าสุด</span>
-                    <span class="pill" id="lastUpdated">—</span>
+            </section>
+
+            <section class="focus-section">
+                <h2>ประสิทธิภาพ</h2>
+                <div class="grid performance-grid">
+                    <div class="card">
+                        <div class="label">Recursion Time</div>
+                        <div class="small-grid">
+                            <div class="item">
+                                <div class="l">Average</div>
+                                <div class="v" data-k="recursion_time_avg" data-unit=" ms">{{ s.recursion_time_avg | num }} ms</div>
+                            </div>
+                            <div class="item">
+                                <div class="l">Median</div>
+                                <div class="v" data-k="recursion_time_median" data-unit=" ms">{{ s.recursion_time_median | num }} ms</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Cache Sizes</div>
+                        <div class="sub">จำนวน entry ในแคช (ไม่ใช่ขนาดหน่วยความจำ)</div>
+                        <div class="small-grid">
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="จำนวนรายการข้อความ DNS ที่เก็บใน cache ไม่ใช่ขนาดหน่วยความจำ" aria-label="Msg: จำนวนรายการข้อความ DNS ที่เก็บใน cache ไม่ใช่ขนาดหน่วยความจำ">Msg</span></div>
+                                <div class="v" data-k="msg_cache" data-fmt="1">{{ s.msg_cache | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="Resource Record Set: กลุ่ม DNS records เช่น A, AAAA หรือ MX ที่เก็บใน cache" aria-label="RRset: กลุ่ม DNS records ที่เก็บใน cache">RRset</span></div>
+                                <div class="v" data-k="rrset_cache" data-fmt="1">{{ s.rrset_cache | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="ข้อมูลเกี่ยวกับ DNS servers ที่ Unbound ติดต่อ เช่น เวลาและสถานะการตอบกลับ" aria-label="Infra: ข้อมูลเกี่ยวกับ DNS servers ที่ Unbound ติดต่อ">Infra</span></div>
+                                <div class="v" data-k="infra_cache" data-fmt="1">{{ s.infra_cache | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="รายการ DNSSEC keys ที่ cache ไว้เพื่อใช้ตรวจสอบลายเซ็น DNS" aria-label="Key: รายการ DNSSEC keys ที่ cache ไว้">Key</span></div>
+                                <div class="v" data-k="key_cache" data-fmt="1">{{ s.key_cache | num }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <svg class="spark" id="spark" viewBox="0 0 600 140" preserveAspectRatio="none" aria-label="กราฟ QPS">
-                <defs>
-                    <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="var(--accent)" stop-opacity=".35" />
-                        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
-                    </linearGradient>
-                </defs>
-                <g stroke="currentColor" stroke-opacity=".08" stroke-width="1">
-                    <line x1="0" y1="35" x2="600" y2="35" />
-                    <line x1="0" y1="70" x2="600" y2="70" />
-                    <line x1="0" y1="105" x2="600" y2="105" />
-                </g>
-                <path id="sparkArea" fill="url(#sparkFill)" d=""></path>
-                <path id="sparkLine" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" d=""></path>
-            </svg>
+            </section>
         </div>
 
-        <h2>ประสิทธิภาพ</h2>
-        <div class="grid two">
-            <div class="card">
-                <div class="label">Recursion Time</div>
-                <div class="small-grid">
-                    <div class="item">
-                        <div class="l">Average</div>
-                        <div class="v" data-k="recursion_time_avg" data-unit=" ms">{{ s.recursion_time_avg | num }} ms</div>
+        <div class="grid info-grid">
+            <section class="info-section">
+                <h2>Query Types</h2>
+                <div class="card">
+                    {% set qt_total = (s.qtypes.values() | sum) or 1 %}
+                    {% set ns = namespace(shown=0) %}
+                    <div class="list" id="qtypesList">
+                        {% for k, v in s.qtypes | dictsort(by='value', reverse=true) %}
+                        {% if v > 0 and ns.shown < 12 %}
+                        {% set ns.shown = ns.shown + 1 %}
+                        <div class="row">
+                            <span class="k">{{ k }}</span>
+                            <span class="b"><span class="accent" style="width:{{ (v / qt_total * 100) | round(1) }}%"></span></span>
+                            <span class="v">{{ v | num }}</span>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
-                    <div class="item">
-                        <div class="l">Median</div>
-                        <div class="v" data-k="recursion_time_median" data-unit=" ms">{{ s.recursion_time_median | num }} ms</div>
-                    </div>
+                    <div class="empty{{ ' hidden' if s.qtypes }}" id="qtypesEmpty">ยังไม่มีข้อมูล query type</div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="label">Cache Sizes</div>
-                <div class="sub">จำนวน entry ในแคช (ไม่ใช่ขนาดหน่วยความจำ)</div>
-                <div class="small-grid">
-                    <div class="item">
-                        <div class="l">Msg</div>
-                        <div class="v" data-k="msg_cache" data-fmt="1">{{ s.msg_cache | num }}</div>
-                    </div>
-                    <div class="item">
-                        <div class="l">RRset</div>
-                        <div class="v" data-k="rrset_cache" data-fmt="1">{{ s.rrset_cache | num }}</div>
-                    </div>
-                    <div class="item">
-                        <div class="l">Infra</div>
-                        <div class="v" data-k="infra_cache" data-fmt="1">{{ s.infra_cache | num }}</div>
-                    </div>
-                    <div class="item">
-                        <div class="l">Key</div>
-                        <div class="v" data-k="key_cache" data-fmt="1">{{ s.key_cache | num }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </section>
 
-        <h2>Response Codes</h2>
-        <div class="card">
-            {% set rc_total = (s.rcodes.values() | sum) or 1 %}
-            <div class="list" id="rcodesList">
-                {% for k, v in s.rcodes | dictsort(by='value', reverse=true) %}
-                {% if v > 0 %}
-                <div class="row">
-                    <span class="k">{{ k }}</span>
-                    <span class="b"><span class="{{ 'good' if k == 'NOERROR' else ('bad' if k == 'SERVFAIL' else ('warn' if k in ['NXDOMAIN', 'REFUSED'] else '')) }}"
-                            style="width:{{ (v / rc_total * 100) | round(1) }}%"></span></span>
-                    <span class="v">{{ v | num }}</span>
+            <section class="info-section">
+                <h2><span class="term" tabindex="0" data-tip="Domain Name System Security Extensions: ส่วนขยายที่ใช้ตรวจสอบความถูกต้องของข้อมูล DNS" aria-label="DNSSEC: ส่วนขยายสำหรับตรวจสอบความถูกต้องของข้อมูล DNS">DNSSEC</span> &amp; <span class="term" tabindex="0" data-tip="วิธีส่ง DNS queries ระหว่าง client กับ resolver" aria-label="Transport: วิธีส่ง DNS queries ระหว่าง client กับ resolver">Transport</span></h2>
+                <div class="grid transport-grid">
+                    <div class="card">
+                        <div class="label"><span class="term" tabindex="0" data-tip="Domain Name System Security Extensions: ตรวจลายเซ็นเพื่อยืนยันว่าคำตอบ DNS ถูกต้อง" aria-label="DNSSEC validation">DNSSEC</span></div>
+                        <div class="small-grid">
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="จำนวนคำตอบที่ตรวจสอบ DNSSEC แล้วผ่านและลายเซ็นถูกต้อง" aria-label="Secure: คำตอบที่ผ่านการตรวจสอบ DNSSEC">Secure</span></div>
+                                <div class="v good" data-k="secure" data-fmt="1">{{ s.secure | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="จำนวนคำตอบที่ตรวจสอบ DNSSEC แล้วไม่ผ่าน เช่น ลายเซ็นหรือ chain ไม่ถูกต้อง" aria-label="Bogus: คำตอบที่ตรวจสอบ DNSSEC แล้วไม่ผ่าน">Bogus</span></div>
+                                <div class="v {{ 'bad' if (s.bogus or 0) > 0 else '' }}" data-k="bogus" data-fmt="1">{{ s.bogus | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="Extension Mechanisms for DNS: ส่วนขยาย DNS ที่รองรับความสามารถเพิ่มเติม เช่น ขนาดข้อความที่ใหญ่ขึ้น" aria-label="EDNS: ส่วนขยาย DNS สำหรับความสามารถเพิ่มเติม">EDNS</span></div>
+                                <div class="v" data-k="edns" data-fmt="1">{{ s.edns | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="DNSSEC OK bit: client ขอรับ DNSSEC records; ไม่ได้ยืนยันเองว่าคำตอบผ่านการตรวจสอบแล้ว" aria-label="DO bit: flag ที่ client ใช้ขอ DNSSEC records">DO bit</span></div>
+                                <div class="v" data-k="do" data-fmt="1">{{ s.do | num }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="label"><span class="term" tabindex="0" data-tip="วิธีส่ง DNS queries ระหว่าง client กับ resolver" aria-label="Transport: วิธีส่ง DNS queries ระหว่าง client กับ resolver">Transport</span></div>
+                        <div class="small-grid">
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="User Datagram Protocol: การส่ง DNS แบบ datagram มี overhead ต่ำและใช้ทั่วไป" aria-label="UDP: User Datagram Protocol">UDP</span></div>
+                                <div class="v" data-k="udp" data-fmt="1">{{ s.udp | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="Transmission Control Protocol: การส่ง DNS แบบเชื่อถือได้ มักใช้กับคำตอบขนาดใหญ่หรือ fallback" aria-label="TCP: Transmission Control Protocol">TCP</span></div>
+                                <div class="v" data-k="tcp" data-fmt="1">{{ s.tcp | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="DNS over TLS: ส่ง DNS ผ่านการเชื่อมต่อ TLS ที่เข้ารหัส" aria-label="TLS: DNS over TLS แบบเข้ารหัส">TLS</span></div>
+                                <div class="v" data-k="tls" data-fmt="1">{{ s.tls | num }}</div>
+                            </div>
+                            <div class="item">
+                                <div class="l"><span class="term" tabindex="0" data-tip="จำนวน query ที่รับผ่านเครือข่าย IPv6 ไม่ใช่จำนวน DNS records ชนิด AAAA" aria-label="IPv6: จำนวน query ที่รับผ่านเครือข่าย IPv6">IPv6</span></div>
+                                <div class="v" data-k="ipv6" data-fmt="1">{{ s.ipv6 | num }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-            <div class="empty{{ ' hidden' if s.rcodes }}" id="rcodesEmpty">ยังไม่มีข้อมูล response code</div>
+            </section>
         </div>
-
-        <h2>Query Types</h2>
-        <div class="card">
-            {% set qt_total = (s.qtypes.values() | sum) or 1 %}
-            {% set ns = namespace(shown=0) %}
-            <div class="list" id="qtypesList">
-                {% for k, v in s.qtypes | dictsort(by='value', reverse=true) %}
-                {% if v > 0 and ns.shown < 12 %}
-                {% set ns.shown = ns.shown + 1 %}
-                <div class="row">
-                    <span class="k">{{ k }}</span>
-                    <span class="b"><span class="accent" style="width:{{ (v / qt_total * 100) | round(1) }}%"></span></span>
-                    <span class="v">{{ v | num }}</span>
-                </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-            <div class="empty{{ ' hidden' if s.qtypes }}" id="qtypesEmpty">ยังไม่มีข้อมูล query type</div>
-        </div>
-
-    <h2>DNSSEC & Transport</h2>
-    <div class="grid two">
-        <div class="card">
-            <div class="label">DNSSEC</div>
-            <div class="small-grid">
-                <div class="item">
-                    <div class="l">Secure</div>
-                    <div class="v good" data-k="secure" data-fmt="1">{{ s.secure | num }}</div>
-                </div>
-                <div class="item">
-                    <div class="l">Bogus</div>
-                    <div class="v {{ 'bad' if (s.bogus or 0) > 0 else '' }}" data-k="bogus" data-fmt="1">{{ s.bogus | num }}</div>
-                </div>
-                <div class="item">
-                    <div class="l">EDNS</div>
-                    <div class="v" data-k="edns" data-fmt="1">{{ s.edns | num }}</div>
-                </div>
-                <div class="item">
-                    <div class="l">DO bit</div>
-                    <div class="v" data-k="do" data-fmt="1">{{ s.do | num }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="label">Transport</div>
-            <div class="small-grid">
-                <div class="item">
-                    <div class="l">UDP</div>
-                    <div class="v" data-k="udp" data-fmt="1">{{ s.udp | num }}</div>
-                </div>
-                <div class="item">
-                    <div class="l">TCP</div>
-                    <div class="v" data-k="tcp" data-fmt="1">{{ s.tcp | num }}</div>
-                </div>
-                <div class="item">
-                    <div class="l">TLS</div>
-                    <div class="v" data-k="tls" data-fmt="1">{{ s.tls | num }}</div>
-                </div>
-                <div class="item">
-                    <div class="l">IPv6</div>
-                    <div class="v" data-k="ipv6" data-fmt="1">{{ s.ipv6 | num }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
     {% endif %}
 
-    <details class="card raw-card">
-        <summary>Raw status (unbound-control status)</summary>
-        <pre class="raw" style="border:0;border-radius:0;padding:.6em 0 0;background:transparent">{{ status }}</pre>
-    </details>
     </div>
+
+    <dialog class="raw-dialog" id="rawDialog" aria-labelledby="rawDialogTitle">
+        <div class="raw-dialog-head">
+            <h2 id="rawDialogTitle">Raw status</h2>
+            <button type="button" id="closeRawDialog" aria-label="ปิด">×</button>
+        </div>
+        <pre class="raw">{{ status }}</pre>
+    </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -766,9 +1104,6 @@
         const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
         let paused = false;
-        let qpsHistory = [];
-        let lastQ = null;
-        let lastTs = 0;
         let toastTimer = null;
 
         function toast(text, ok = true, ms = 4000) {
@@ -800,18 +1135,61 @@
             }).join('');
         }
 
-        function drawSpark() {
-            const line = $('sparkLine'), area = $('sparkArea');
-            if (!line || !area) return;
-            const w = 600, h = 140, pad = 8;
-            const data = qpsHistory.length ? qpsHistory.slice() : [0];
-            if (data.length === 1) data.push(data[0]);
-            const max = Math.max(1, ...data);
-            const step = data.length > 1 ? (w - pad * 2) / (data.length - 1) : 0;
-            const pts = data.map((v, i) => [pad + i * step, h - pad - (v / max) * (h - pad * 2)]);
-            const path = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-            line.setAttribute('d', path);
-            area.setAttribute('d', path + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (h - pad) + ' L' + pad + ' ' + (h - pad) + ' Z');
+        function renderResponseCodes(stats) {
+            const donut = $('donutChart');
+            const donutType = $('donutType');
+            const donutPercent = $('donutPercent');
+            const legend = $('donutLegend');
+            if (!donut || !donutType || !donutPercent || !legend) return;
+
+            const entries = Object.entries(stats || {})
+                .filter(([, v]) => Number(v) > 0)
+                .sort((a, b) => Number(b[1]) - Number(a[1]));
+
+            if (!entries.length) {
+                donut.style.background = 'conic-gradient(#d8e4dc 0 100%)';
+                donutType.textContent = 'Waiting';
+                donutType.classList.add('small');
+                donutPercent.textContent = 'No data';
+                legend.innerHTML = '<div class="legend-item"><span class="legend-swatch" style="background:#d8e4dc"></span><span class="name">No response log data</span><span class="value">0%</span></div>';
+                return;
+            }
+
+            donutType.classList.remove('small');
+            const total = entries.reduce((sum, [, v]) => sum + Number(v), 0);
+            const colors = {
+                NOERROR: '#35b26d',
+                NXDOMAIN: '#f2a33c',
+                SERVFAIL: '#d95757',
+                REFUSED: '#e8863a',
+                FORMERR: '#4aa5ff',
+                NOTIMPL: '#8ecae6'
+            };
+            let cursor = 0;
+            const colorFor = name => colors[name] || '#8a9ba3';
+            const gradientParts = entries.map(([name, value]) => {
+                const segment = ((Number(value) / total) * 100);
+                const start = cursor;
+                cursor += segment;
+                return `${colorFor(name)} ${start}% ${cursor}%`;
+            });
+
+            donut.style.background = 'conic-gradient(' + gradientParts.join(', ') + ')';
+
+            const topName = entries[0][0];
+            const topPct = (Number(entries[0][1]) / total) * 100;
+            donutType.textContent = topName;
+            donutPercent.textContent = topPct.toFixed(1) + '%';
+
+            const topRows = entries.slice(0, 6).map(([name, value]) => {
+                const per = (Number(value) / total) * 100;
+                return '<div class="legend-item">' +
+                    '<span class="legend-swatch" style="background:' + colorFor(name) + '"></span>' +
+                    '<span class="name">' + esc(name) + '</span>' +
+                    '<span class="value">' + per.toFixed(1) + '%</span>' +
+                    '</div>';
+            }).join('');
+            legend.innerHTML = topRows;
         }
 
         function apply(s) {
@@ -843,11 +1221,8 @@
             const pill = $('statusPill');
             if (pill) { pill.textContent = 'online'; pill.className = 'pill ok'; }
 
-            const rcTotal = Object.values(s.rcodes || {}).reduce((a, b) => a + b, 0) || 1;
             const qtTotal = Object.values(s.qtypes || {}).reduce((a, b) => a + b, 0) || 1;
-            renderRows($('rcodesList'), s.rcodes, rcTotal);
             renderRows($('qtypesList'), s.qtypes, qtTotal);
-            if ($('rcodesEmpty')) $('rcodesEmpty').classList.toggle('hidden', !!Object.keys(s.rcodes || {}).length);
             if ($('qtypesEmpty')) $('qtypesEmpty').classList.toggle('hidden', !!Object.keys(s.qtypes || {}).length);
             if ($('extHint')) $('extHint').classList.toggle('hidden', !!s.extended);
 
@@ -861,13 +1236,19 @@
             lastQ = s.queries;
             lastTs = now;
 
-            const qn = $('qpsNow');
-            if (qn) qn.textContent = (qpsHistory.length ? qpsHistory[qpsHistory.length - 1] : s.qps).toFixed(1);
+        }
 
-            const lu = $('lastUpdated');
-            if (lu) lu.textContent = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-            drawSpark();
+        async function refreshResponseCodes() {
+            if (paused) return;
+            try {
+                const r = await fetch('/api/response-codes', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                if (r.status === 401) { location.href = '/login'; return; }
+                if (!r.ok) return;
+                const data = await r.json();
+                renderResponseCodes(data.counts || {});
+                const lu = $('lastUpdated');
+                if (lu) lu.textContent = fmtInt(data.total) + ' records';
+            } catch (_) { /* เงียบไว้ รอรอบถัดไป */ }
         }
 
         async function refresh() {
@@ -906,6 +1287,26 @@
         }
         applyTheme(root.dataset.theme || 'light');
 
+        const userMenu = $('userMenu');
+        const userMenuButton = $('userMenuButton');
+        const userDropdown = $('userDropdown');
+        const setUserMenuOpen = open => {
+            userMenuButton.setAttribute('aria-expanded', String(open));
+            userDropdown.hidden = !open;
+        };
+        userMenuButton.addEventListener('click', () => {
+            setUserMenuOpen(userMenuButton.getAttribute('aria-expanded') !== 'true');
+        });
+        document.addEventListener('click', event => {
+            if (!userMenu.contains(event.target)) setUserMenuOpen(false);
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && userMenuButton.getAttribute('aria-expanded') === 'true') {
+                setUserMenuOpen(false);
+                userMenuButton.focus();
+            }
+        });
+
         $('themeBtn').addEventListener('click', () => {
             const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
             try { localStorage.setItem('unbound-theme', next); } catch (_) { }
@@ -916,14 +1317,23 @@
             paused = !paused;
             e.currentTarget.textContent = paused ? '▶' : '⏸';
             e.currentTarget.classList.toggle('danger', paused);
-            if (!paused) refresh();
+            if (!paused) { refresh(); refreshResponseCodes(); }
+        });
+
+        const rawDialog = $('rawDialog');
+        $('rawStatusBtn').addEventListener('click', () => rawDialog.showModal());
+        $('closeRawDialog').addEventListener('click', () => rawDialog.close());
+        rawDialog.addEventListener('click', (event) => {
+            if (event.target === rawDialog) rawDialog.close();
         });
 
         $('reloadBtn').addEventListener('click', () => doAction('/reload', 'Reload Unbound?'));
         $('flushBtn').addEventListener('click', () => doAction('/flush', 'Flush cache (bogus/negative)?'));
 
         refresh();
+        refreshResponseCodes();
         setInterval(refresh, REFRESH_MS);
+        setInterval(refreshResponseCodes, REFRESH_MS);
     </script>
 </body>
 
