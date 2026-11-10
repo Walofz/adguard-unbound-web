@@ -14,45 +14,47 @@
     </script>
     <style>
         :root {
-            --bg: #f2f4f7;
-            --panel: #ffffff;
-            --panel2: #f3f5f8;
-            --border: #e3e8ee;
-            --text: #2f3439;
-            --muted: #7b8794;
-            --accent: #67b279;
-            --good: #4caf6d;
-            --warn: #f2a33c;
-            --bad: #e05252;
+            --bg: #f1f4f2;
+            --panel: #fbfcfb;
+            --panel2: #f3f6f4;
+            --border: #cfd9d3;
+            --text: #172421;
+            --muted: #5f726a;
+            --accent: #35b26d;
+            --accent-strong: #24975f;
+            --accent-soft: rgba(53, 178, 109, 0.12);
+            --good: #2fa66b;
+            --warn: #d39a2f;
+            --bad: #d95757;
             --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-            --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+            --shadow: 0 8px 24px rgba(23, 36, 33, 0.06);
             color-scheme: light;
         }
 
         [data-theme="dark"] {
-            --bg: #14181d;
-            --panel: #1c2229;
-            --panel2: #232b33;
-            --border: #2b333d;
-            --text: #e6edf3;
-            --muted: #8b98a5;
-            --accent: #67b279;
-            --good: #67b279;
-            --warn: #f2a33c;
-            --bad: #e05252;
-            --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+            --bg: #0d1518;
+            --panel: rgba(17, 27, 31, 0.92);
+            --panel2: #16252d;
+            --border: #23353f;
+            --text: #e9f0f2;
+            --muted: #9cb0b8;
+            --accent: #78d7a2;
+            --accent-strong: #60c892;
+            --accent-soft: rgba(120, 215, 162, 0.14);
+            --good: #8de3b4;
+            --warn: #f3bc5d;
+            --bad: #ff8d8d;
+            --shadow: 0 14px 32px rgba(2, 6, 10, 0.32);
             color-scheme: dark;
         }
 
-        * {
-            box-sizing: border-box
-        }
+        * { box-sizing: border-box }
 
         body {
             margin: 0;
             background: var(--bg);
             color: var(--text);
-            font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif
+            font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
         }
 
         .topbar {
@@ -62,33 +64,144 @@
             padding: .9em 1.4em;
             border-bottom: 1px solid var(--border);
             background: var(--panel);
+            backdrop-filter: blur(8px);
             position: sticky;
             top: 0;
             z-index: 10;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
-            flex-wrap: wrap
+            box-shadow: 0 1px 0 rgba(23, 36, 33, .04);
+            flex-wrap: wrap;
+        }
+
+        [data-theme="dark"] .topbar {
+            background: var(--panel);
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: .55em
+            gap: .55em;
         }
 
         .brand svg {
-            width: 26px;
-            height: 26px;
-            color: var(--accent)
+            width: 28px;
+            height: 28px;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid rgba(53, 178, 109, 0.2);
+            border-radius: 10px;
+            padding: 5px;
         }
 
         .brand h1 {
-            font-size: 1.05em;
+            font-size: 1.02em;
             margin: 0;
-            font-weight: 600
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
-        .topbar .spacer {
-            flex: 1
+        .topbar .spacer { flex: 1 }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: .5em;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: .52em .85em;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .8em;
+            font-weight: 600;
+            transition: all .15s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(53, 178, 109, 0.1);
+            border-color: rgba(53, 178, 109, 0.28);
+            color: var(--accent-strong);
+        }
+
+        .user-menu {
+            position: relative;
+            z-index: 20;
+        }
+
+        .user-menu-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: .45em;
+            padding: .5em .7em;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+            font-size: .82em;
+            cursor: pointer;
+        }
+
+        .user-menu-trigger:hover,
+        .user-menu-trigger[aria-expanded="true"] {
+            border-color: var(--border);
+            background: var(--panel2);
+        }
+
+        .user-menu-trigger .caret {
+            color: var(--muted);
+            transition: transform .15s ease;
+        }
+
+        .user-menu-trigger[aria-expanded="true"] .caret {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + .4em);
+            right: 0;
+            min-width: 170px;
+            padding: .35em;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .user-dropdown[hidden] {
+            display: none;
+        }
+
+        .user-dropdown:not([hidden]) {
+            display: grid;
+            gap: .15em;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: .65em .75em;
+            border-radius: 6px;
+            color: var(--text);
+            font-size: .84em;
+            text-decoration: none;
+        }
+
+        .user-dropdown a:hover {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+        }
+
+        .user-dropdown a.logout {
+            color: var(--bad);
         }
 
         .topbar .muted {
@@ -98,35 +211,38 @@
 
         .topbar a {
             text-decoration: none;
-            font-size: .85em
+            font-size: .82em;
+            color: var(--text);
         }
 
         .icon-btn {
             background: var(--panel2);
             color: var(--text);
             border: 1px solid var(--border);
-            padding: .45em .9em;
-            border-radius: 6px;
+            padding: .5em .9em;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: .85em
+            font-size: .82em;
+            transition: border-color .15s ease, background .15s ease, transform .15s ease;
         }
 
         .icon-btn:hover {
-            background: var(--border)
+            border-color: var(--accent);
+            transform: translateY(-1px);
         }
 
         .container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 1.4em
+            padding: 1.4em;
         }
 
         .card {
             background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: var(--shadow);
-            padding: 1em 1.2em
+            padding: 1em 1.2em;
         }
 
         .filters {
@@ -173,13 +289,13 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: .86em
+            font-size: .92em
         }
 
         th {
             text-align: left;
             color: var(--muted);
-            font-size: .78em;
+            font-size: .82em;
             text-transform: uppercase;
             letter-spacing: .04em;
             padding: .7em .8em;
@@ -304,12 +420,21 @@
         </div>
         <span class="muted" id="source" title="{{ log_path }}">{{ log_path }}</span>
         <div class="spacer"></div>
-        <span class="muted">👤 {{ user }}</span>
-        <a href="/" style="color:var(--accent);font-weight:600">Dashboard</a>
+        <div class="user-menu" id="userMenu">
+            <button type="button" class="user-menu-trigger" id="userMenuButton" aria-expanded="false" aria-controls="userDropdown">
+                <span>👤 {{ user }}</span><span class="caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="user-dropdown" id="userDropdown" hidden>
+                <a href="/change-password">Password</a>
+                <a class="logout" href="/logout">Logout</a>
+            </div>
+        </div>
+        <div class="nav-group">
+            <a class="nav-link" href="/">Dashboard</a>
+            <a class="nav-link active" href="/queries">Query log</a>
+        </div>
         <button id="themeBtn" class="icon-btn" title="สลับธีม">🌙</button>
         <button id="pauseBtn" class="icon-btn" title="หยุด/เริ่มอัปเดตอัตโนมัติ">⏸</button>
-        <a href="/change-password" style="color:var(--muted)">password</a>
-        <a href="/logout" style="color:var(--muted)">logout</a>
     </div>
 
     <div class="container">
@@ -328,10 +453,9 @@
                 <option value="NOTIMPL">NOTIMPL</option>
             </select>
             <select id="limit">
+                <option value="50" selected>50 รายการ</option>
                 <option value="100">100 รายการ</option>
-                <option value="200" selected>200 รายการ</option>
-                <option value="500">500 รายการ</option>
-                <option value="1000">1000 รายการ</option>
+                <option value="200">200 รายการ</option>
             </select>
             <span class="meta"><span class="dot" id="liveDot"></span><span id="meta">—</span></span>
         </div>
@@ -431,7 +555,7 @@ tail -f logs/unbound.log</pre>
                 '<td class="mono name" title="' + esc(it.qname) + '">' + esc(it.qname) + '</td>' +
                 '<td><span class="type">' + esc(it.qtype) + '</span></td>' +
                 '<td>' + badge(it.rcode) + '</td>' +
-                '<td class="num">' + (it.elapsed == null ? '—' : (it.elapsed * 1000).toFixed(4)) + '</td>' +
+                '<td class="num">' + (it.elapsed == null ? '—' : (it.elapsed * 1000).toFixed(2)) + '</td>' +
                 '<td>' + (it.cached == null ? '—' : (it.cached ? 'cache' : 'miss')) + '</td>' +
                 '<td class="num">' + (it.size == null ? '—' : it.size) + '</td>' +
                 '</tr>').join('');
@@ -463,6 +587,26 @@ tail -f logs/unbound.log</pre>
             $('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
         }
         applyTheme(root.dataset.theme || 'light');
+
+        const userMenu = $('userMenu');
+        const userMenuButton = $('userMenuButton');
+        const userDropdown = $('userDropdown');
+        const setUserMenuOpen = open => {
+            userMenuButton.setAttribute('aria-expanded', String(open));
+            userDropdown.hidden = !open;
+        };
+        userMenuButton.addEventListener('click', () => {
+            setUserMenuOpen(userMenuButton.getAttribute('aria-expanded') !== 'true');
+        });
+        document.addEventListener('click', event => {
+            if (!userMenu.contains(event.target)) setUserMenuOpen(false);
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && userMenuButton.getAttribute('aria-expanded') === 'true') {
+                setUserMenuOpen(false);
+                userMenuButton.focus();
+            }
+        });
 
         $('themeBtn').addEventListener('click', () => {
             const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
