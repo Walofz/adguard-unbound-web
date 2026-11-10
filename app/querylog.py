@@ -88,7 +88,7 @@ def read_queries(
     entries = []
     for line in lines:
         e = _parse(line)
-        if e:
+        if e and e["rcode"] is not None:
             entries.append(e)
 
     if search:

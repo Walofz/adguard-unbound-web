@@ -212,10 +212,25 @@ def queries_page(request: Request, user: str = Depends(current_user)):
 
 
 @app.get("/api/queries")
-def api_queries(limit: int = 100, q: str = "", qtype: str = "", rcode: str = "",
+def api_queries(limit: int = 50, q: str = "", qtype: str = "", rcode: str = "",
                 user: str = Depends(current_user)):
-    limit = max(1, min(limit, 1000))
+    limit = max(1, min(limit, 200))
     return querylog.read_queries(limit=limit, search=q, qtype=qtype, rcode=rcode)
+
+
+@app.get("/api/response-codes")
+def api_response_codes(user: str = Depends(current_user)):
+    result = querylog.read_queries(limit=1000)
+    counts = {}
+    for entry in result["items"]:
+        code = entry["rcode"]
+        counts[code] = counts.get(code, 0) + 1
+    return {
+        "available": result["available"],
+        "counts": counts,
+        "total": len(result["items"]),
+        "limit": 1000,
+    }
 
 @app.get("/logout")
 def logout(request: Request):
